@@ -21,6 +21,11 @@ class Step(BaseModel):
     params: Dict[str, Any]
     risk: RiskLevel
     description: str
+    dependencies: List[int] = []
+    status: TaskStatus = TaskStatus.PENDING
+    attempts: int = 0
+    max_retries: int = 3
+    error_message: Optional[str] = None
 
 class Plan(BaseModel):
     type: str = "plan"

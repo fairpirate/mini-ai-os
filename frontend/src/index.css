@@ -1,104 +1,93 @@
-:root {
-  --bg-dark: #0a0a0f;
-  --bg-card: #161622;
-  --primary: #6366f1;
-  --primary-hover: #4f46e5;
-  --accent: #ec4899;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --glass: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
-}
+@import "tailwindcss";
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@theme {
+  /* JARVIS color palette */
+  --color-jarvis-dark: #0a0a0f;
+  --color-jarvis-panel: rgba(15, 20, 30, 0.65);
+  --color-jarvis-border: rgba(0, 200, 255, 0.2);
+  --color-jarvis-highlight: #00c8ff;
+  --color-jarvis-alert: #ff3366;
+  --color-jarvis-success: #00ff99;
+
+  /* Custom animations */
+  --animate-radar-spin: spin 4s linear infinite;
+  --animate-pulse-glow: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-scanline: scanline 8s linear infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-flicker: flicker 0.15s infinite;
+
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  @keyframes flicker {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { opacity: 0.9; }
+  }
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: var(--bg-dark);
-  color: var(--text-main);
-  overflow-x: hidden;
-}
-
-.glass-morphism {
-  background: var(--glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-}
-
-.premium-card {
-  background: var(--bg-card);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.btn-primary {
-  background: var(--primary);
+  background-color: var(--color-jarvis-dark);
   color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: 600;
+  overflow: hidden;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-.btn-primary:hover {
-  background: var(--primary-hover);
-  transform: translateY(-1px);
+.glass-panel {
+  background-color: var(--color-jarvis-panel);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-jarvis-border);
+  border-radius: 0.75rem;
+  box-shadow: 0 0 15px rgba(0, 200, 255, 0.1);
 }
 
-.btn-ghost {
-  background: transparent;
-  border: 1px solid var(--glass-border);
-  color: var(--text-main);
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
+.neon-text {
+  color: var(--color-jarvis-highlight);
+  text-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
 }
 
-.btn-ghost:hover {
-  background: var(--glass);
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
-.status-badge {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
+/* Markdown Content Styling */
+.markdown-content p {
+  margin-bottom: 0.5rem;
+}
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+.markdown-content ul, .markdown-content ol {
+  margin-left: 1rem;
+  margin-bottom: 0.5rem;
+}
+.markdown-content ul {
+  list-style-type: disc;
+}
+.markdown-content ol {
+  list-style-type: decimal;
+}
+.markdown-content strong {
+  color: var(--color-jarvis-highlight);
+}
+.markdown-content code {
+  @apply bg-black/40 px-1 rounded font-mono text-xs border border-white/10;
+}
+.markdown-content pre {
+  @apply bg-black/60 p-2 rounded border border-white/20 my-2 overflow-x-auto;
+}
+.markdown-content blockquote {
+  @apply border-l-2 border-jarvis-highlight/50 pl-2 italic text-gray-400 my-1;
 }
 
-.status-pending { background: #fef3c7; color: #92400e; }
-.status-approved { background: #d1fae5; color: #065f46; }
-.status-executing { background: #dbeafe; color: #1e40af; }
-.status-completed { background: #d1fae5; color: #065f46; }
-.status-failed { background: #fee2e2; color: #991b1b; }
-
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-dark);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--glass-border);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
-}

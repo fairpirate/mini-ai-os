@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/chroma_db:/app/chroma_db
+      - ./backend/plugins:/app/plugins
+      - ./backend/config:/app/config
+    environment:
+      - MODEL_NAME=gemma2:2b
+      - VISION_MODEL_NAME=llava
+      - OLLAMA_URL=http://ollama:11434
+      - CHROME_PATH=/usr/bin/google-chrome
+    depends_on:
+      - ollama
+    networks:
+      - jarvis-net
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - jarvis-net
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - jarvis-net
+    # Optional: GPU support
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+networks:
+  jarvis-net:
+    driver: bridge
+
+volumes:
+  ollama_data:

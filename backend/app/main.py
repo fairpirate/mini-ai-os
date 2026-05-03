@@ -1,113 +1,69 @@
-import uuid
-import time
-import os
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .models.schemas import Task, TaskStatus, ApproveRequest, Union, ChatResponse, Plan
-from .planner.planner import generate_plan
-from .engine.executor import add_task, get_all_tasks, get_task, execute_task
-from .tools.implementations import registry # Ensure tools are registered
+from contextlib import asynccontextmanager
 
-app = FastAPI(title="Mini AI OS Core")
+# Core imports
+from .core.config import settings
+from .core.logging import logger
+from .core.exceptions import global_exception_handler
+from .core.middleware import log_requests_middleware
+from .engine.queue import task_manager
+from .engine.tools.registry import tool_registry
+from .engine.browser import browser_engine
+from .engine.plugins.manager import plugin_manager
 
-# Enable CORS for React frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Routers
+from .api.routers import system, ws, legacy
 
-@app.post("/plan", response_model=Union[Task, ChatResponse])
-async def create_plan(request: dict):
-    user_prompt = request.get("prompt")
-    if not user_prompt:
-        raise HTTPException(status_code=400, detail="Prompt is required")
-
-    ai_response = await generate_plan(user_prompt)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Initialize background services
+    logger.info("Initializing JARVIS Background Systems...")
+    await task_manager.start()
+    tool_registry.load_plugins()
+    await plugin_manager.discover()
+    logger.info("Plugin Registry and Manager Loaded.")
+    await browser_engine.start()
     
-    if isinstance(ai_response, ChatResponse):
-        return ai_response
+    yield
     
-    # It's a plan, create a task
-    task_id = str(uuid.uuid4())
-    task = Task(
-        id=task_id,
-        status=TaskStatus.PENDING,
-        plan=ai_response,
-        created_at=time.time(),
-        updated_at=time.time()
+    # Shutdown: Clean up resources
+    logger.info("Shutting down JARVIS systems...")
+    await browser_engine.stop()
+    await task_manager.stop()
+
+def create_app() -> FastAPI:
+    """Factory function to configure and return the FastAPI application."""
+    app = FastAPI(
+        title=settings.PROJECT_NAME,
+        version=settings.VERSION,
+        lifespan=lifespan
     )
-    add_task(task)
-    return task
 
-@app.post("/approve/{task_id}")
-async def approve_task(task_id: str, background_tasks: BackgroundTasks):
-    task = get_task(task_id)
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
+    # Middleware setup
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.BACKEND_CORS_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     
-    if task.status != TaskStatus.PENDING:
-        raise HTTPException(status_code=400, detail=f"Task is in status {task.status}")
+    # Custom Middlewares
+    app.middleware("http")(log_requests_middleware)
     
-    task.status = TaskStatus.APPROVED
-    task.updated_at = time.time()
-    
-    # Run execution in background
-    background_tasks.add_task(execute_task, task_id)
-    
-    return {"message": "Task approved and execution started.", "task_id": task_id}
+    # Exception Handlers
+    app.add_exception_handler(Exception, global_exception_handler)
 
-@app.get("/tasks")
-async def list_tasks():
-    return get_all_tasks()
+    # Include modular routers
+    app.include_router(system.router, prefix=settings.API_V1_STR + "/system", tags=["System"])
+    app.include_router(ws.router, prefix="/ws", tags=["WebSocket"])
+    app.include_router(legacy.router, tags=["Legacy"])
 
-@app.get("/tasks/{task_id}")
-async def fetch_task(task_id: str):
-    task = get_task(task_id)
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return task
+    return app
 
-@app.get("/tools")
-async def list_available_tools():
-    return registry.list_tools()
-
-@app.get("/files")
-async def list_files():
-    sandbox_dir = "sandbox"
-    if not os.path.exists(sandbox_dir):
-        return []
-    
-    files = []
-    for filename in os.listdir(sandbox_dir):
-        path = os.path.join(sandbox_dir, filename)
-        if os.path.isfile(path):
-            files.append({
-                "name": filename,
-                "size": os.path.getsize(path),
-                "modified_at": os.path.getmtime(path)
-            })
-    return files
-
-@app.get("/health")
-async def health_check():
-    # Also check if Ollama is accessible
-    ollama_online = False
-    try:
-        import httpx
-        from .planner.planner import OLLAMA_URL
-        async with httpx.AsyncClient() as client:
-            res = await client.get(OLLAMA_URL.replace("/generate", "/tags"), timeout=1.0)
-            ollama_online = res.status_code == 200
-    except:
-        pass
-        
-    return {
-        "status": "online",
-        "ollama": "online" if ollama_online else "offline"
-    }
+app = create_app()
 
 @app.get("/")
 async def root():
-    return {"status": "Mini AI OS Core Online"}
+    return {"message": f"{settings.PROJECT_NAME} API v{settings.VERSION} is running."}

@@ -5,7 +5,7 @@ import os
 from typing import Dict, Any, Union
 from ..models.schemas import Plan, ChatResponse, Step, RiskLevel
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_URL = "http://127.0.0.1:11434/api/generate"
 MODEL_NAME = "gemma:2b" # Use 2b version for better stability on limited hardware
 
 SYSTEM_PROMPT = """
@@ -20,6 +20,8 @@ AVAILABLE TOOLS:
 OUPUT FORMAT:
 You MUST output STRICT JSON. No other text.
 
+Break down complex goals into subtasks. Analyze the dependencies between these subtasks. For example, if building a website, step 1 (create code) must complete before step 2 (deploy code).
+
 If the request requires actions, return a plan:
 {
   "type": "plan",
@@ -29,7 +31,8 @@ If the request requires actions, return a plan:
       "action": "tool_name",
       "params": {"key": "value"},
       "risk": "low" | "medium" | "high",
-      "description": "Short explanation of what this step does"
+      "description": "Short explanation of what this step does",
+      "dependencies": [] // Array of step IDs that must complete BEFORE this step. Empty array if independent.
     }
   ]
 }
@@ -37,8 +40,10 @@ If the request requires actions, return a plan:
 If the request is just a question or greeting, return a chat response:
 {
   "type": "chat",
-  "message": "Your response here"
+  "message": "<write your actual, helpful response to the user here>"
 }
+
+IMPORTANT: Replace the "<write your actual, helpful response to the user here>" placeholder with your actual answer! DO NOT just output the placeholder string.
 
 BE CONCISE. DO NOT hallucinate tools.
 """
@@ -111,7 +116,7 @@ async def generate_plan(prompt: str) -> Union[Plan, ChatResponse]:
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(OLLAMA_URL, json=data, timeout=5.0) # Reduced timeout for faster fallback
+            response = await client.post(OLLAMA_URL, json=data, timeout=60.0) # Increased timeout for slow hardware
             response.raise_for_status()
             result = response.json()
             content = result.get("response", "").strip()
