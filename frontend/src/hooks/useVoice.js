@@ -21,7 +21,7 @@ export const useVoice = (sendMessage) => {
       recognition.onresult = (event) => {
         const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
         console.log("Heard background:", transcript);
-        if (transcript.includes('hey jarvis') || transcript.includes('jarvis')) {
+        if (transcript.includes('hey megan') || transcript.includes('megan')) {
           console.log("Wake word detected!");
           if (!isRecording) startRecording();
         }

@@ -3,6 +3,7 @@ from pydantic import BaseModel, ValidationError
 import asyncio
 import json
 import uuid
+import time
 
 from ...ws.manager import manager
 from ...core.logging import logger
@@ -99,7 +100,7 @@ async def run_ai_pipeline(prompt: str, session_history: list, client_id: str, we
                     await websocket.send_bytes(audio_chunk)
 
             # Save interaction to long-term memory
-            memory_blob = f"User: {prompt}\nJarvis: {response_text}"
+            memory_blob = f"User: {prompt}\nMegan: {response_text}"
             asyncio.create_task(asyncio.to_thread(memory_manager.save_memory, memory_blob))
 
     except Exception as e:
@@ -140,7 +141,7 @@ async def websocket_endpoint(websocket: WebSocket):
     # Send initial connection success event
     await manager.send_personal_message({
         "event": "system_status",
-        "payload": {"status": "connected", "message": "JARVIS Neural Link Established"}
+        "payload": {"status": "connected", "message": "MEGAN Neural Link Established"}
     }, client_id)
 
     # Temporary memory for this session

@@ -12,13 +12,13 @@ class PersonalityProfile(BaseModel):
     style_guidelines: str
 
 class PersonalityState(BaseModel):
-    active_profile: str = "jarvis"
+    active_profile: str = "megan"
     emotional_bias: float = 0.0  # -1 (frustrated) to 1 (enthusiastic)
     context_memory_depth: int = 10
 
 class PersonalityManager:
     """
-    Manages JARVIS's dynamic personalities, emotional tone, and response styles.
+    Manages MEGAN's dynamic personalities, emotional tone, and response styles.
     """
     def __init__(self, config_path: str = "config/personalities.json"):
         self.config_path = config_path
@@ -30,9 +30,9 @@ class PersonalityManager:
 
     def _load_default_profiles(self) -> Dict[str, PersonalityProfile]:
         return {
-            "jarvis": PersonalityProfile(
-                name="JARVIS (Standard)",
-                system_prompt="You are JARVIS, an advanced AI operating system. Be professional, concise, and helpful.",
+            "megan": PersonalityProfile(
+                name="MEGAN (Standard)",
+                system_prompt="You are MEGAN, an advanced AI operating system. Be professional, concise, and helpful.",
                 tone="formal",
                 humor_level=0.3,
                 style_guidelines="Concise, technical, refers to the user as 'Sir'."
@@ -82,7 +82,7 @@ class PersonalityManager:
             json.dump(self.state.dict(), f, indent=2)
 
     def get_active_profile(self) -> PersonalityProfile:
-        return self.profiles.get(self.state.active_profile, self.profiles["jarvis"])
+        return self.profiles.get(self.state.active_profile, self.profiles["megan"])
 
     def switch_profile(self, profile_id: str):
         if profile_id in self.profiles:

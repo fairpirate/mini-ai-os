@@ -2,7 +2,7 @@ import os
 import importlib.util
 import asyncio
 import json
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from .models import PluginManifest, PluginStatus, PluginType, PluginBase
 from ..tools.registry import tool_registry
 from ...core.logging import logger

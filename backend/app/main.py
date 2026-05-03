@@ -18,7 +18,7 @@ from .api.routers import system, ws, legacy
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Initialize background services
-    logger.info("Initializing JARVIS Background Systems...")
+    logger.info("Initializing MEGAN Background Systems...")
     await task_manager.start()
     tool_registry.load_plugins()
     await plugin_manager.discover()
@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI):
     yield
     
     # Shutdown: Clean up resources
-    logger.info("Shutting down JARVIS systems...")
+    logger.info("Shutting down MEGAN systems...")
     await browser_engine.stop()
     await task_manager.stop()
 

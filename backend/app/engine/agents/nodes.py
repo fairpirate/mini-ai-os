@@ -90,8 +90,12 @@ async def vision_agent(state: AgentState) -> Dict[str, Any]:
     screenshot_tool = TakeScreenshotTool()
     locator_tool = LocateUIElementTool()
     
-    tmp_img = "/tmp/agent_screenshot.png"
-    await screenshot_tool.execute({"save_path": tmp_img})
+    tmp_img = os.path.join(os.path.dirname(__file__), "../../../sandbox/agent_screenshot.png")
+    os.makedirs(os.path.dirname(tmp_img), exist_ok=True)
+    
+    screenshot_result = await screenshot_tool.execute({"save_path": tmp_img})
+    if "Error" in screenshot_result:
+        return {"messages": [AIMessage(content=f"Vision output: {screenshot_result}")], "next_agent": "executor"}
     
     task_lower = task.lower()
     
@@ -99,11 +103,14 @@ async def vision_agent(state: AgentState) -> Dict[str, Any]:
         result = await locator_tool.execute({
             "image_path": tmp_img,
             "description": task,
-            "annotate_output_path": "/tmp/agent_annotated.png"
+            "annotate_output_path": os.path.join(os.path.dirname(tmp_img), "agent_annotated.png")
         })
     else:
         # General analysis: extract text and let the LLM reason
         try:
+            if not os.path.exists(tmp_img):
+                raise FileNotFoundError(f"Screenshot file not found at {tmp_img}")
+                
             image = Image.open(tmp_img)
             text = vision_service.extract_text(image)
             prompt = f"The user asked: '{task}'. Here is the OCR text extracted from the current screen: {text}"

@@ -49,9 +49,11 @@ export const ChatPanel = ({ sendMessage }) => {
                 ? 'bg-jarvis-success/10 border border-jarvis-success/30 text-jarvis-success font-mono text-xs'
                 : 'bg-white/5 border border-white/10 text-gray-200'
             }`}>
-              <ReactMarkdown remarkPlugins={[remarkGfm]} className="markdown-content">
-                {msg.text}
-              </ReactMarkdown>
+              <div className="markdown-content">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {typeof msg.text === 'string' ? msg.text : JSON.stringify(msg.text)}
+                </ReactMarkdown>
+              </div>
             </div>
           </motion.div>
         ))}
@@ -64,9 +66,11 @@ export const ChatPanel = ({ sendMessage }) => {
             className="flex justify-start"
           >
             <div className="max-w-[80%] rounded-lg p-3 text-sm bg-white/5 border border-jarvis-highlight/30 text-gray-200 shadow-[0_0_10px_rgba(0,200,255,0.2)]">
-              <ReactMarkdown remarkPlugins={[remarkGfm]} className="markdown-content inline-block">
-                {currentAiStream}
-              </ReactMarkdown>
+              <div className="markdown-content inline-block">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {currentAiStream || ""}
+                </ReactMarkdown>
+              </div>
               <span className="inline-block w-2 h-4 bg-jarvis-highlight ml-1 animate-pulse align-middle"></span>
             </div>
           </motion.div>

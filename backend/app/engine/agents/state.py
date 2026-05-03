@@ -30,7 +30,7 @@ class AgentState(TypedDict):
     shared_memory: Annotated[Dict[str, Any], update_dict]
     
     # Task delegation and prioritization queue
-    task_queue: Annotated[List[Dict[str, Any]], extend_list]
+    task_queue: List[Dict[str, Any]]
     
     # Current task being processed
     current_task: Optional[Dict[str, Any]]

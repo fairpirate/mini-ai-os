@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* JARVIS color palette */
+  /* MEGAN color palette */
   --color-jarvis-dark: #0a0a0f;
   --color-jarvis-panel: rgba(15, 20, 30, 0.65);
   --color-jarvis-border: rgba(0, 200, 255, 0.2);

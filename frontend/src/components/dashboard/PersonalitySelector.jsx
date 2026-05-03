@@ -4,7 +4,7 @@ import { User, Shield, Terminal, Heart, Zap } from 'lucide-react';
 import { useSocketStore } from '../../store/socketStore';
 
 const personalities = [
-  { id: 'jarvis', name: 'JARVIS', icon: Zap, color: 'text-jarvis-highlight' },
+  { id: 'megan', name: 'MEGAN', icon: Zap, color: 'text-jarvis-highlight' },
   { id: 'stark', name: 'STARK', icon: Heart, color: 'text-jarvis-alert' },
   { id: 'tactical', name: 'TACTICAL', icon: Shield, color: 'text-jarvis-success' },
   { id: 'developer', name: 'DEV', icon: Terminal, color: 'text-purple-500' },
