@@ -1,10 +1,20 @@
 import io
-from faster_whisper import WhisperModel
+try:
+    from faster_whisper import WhisperModel
+    WHISPER_AVAILABLE = True
+except ImportError:
+    WHISPER_AVAILABLE = False
+    
 from ...core.logging import logger
 
 class STTEngine:
     """Speech-to-Text Engine using faster-whisper."""
     def __init__(self, model_size="tiny.en", device="cpu", compute_type="int8"):
+        if not WHISPER_AVAILABLE:
+            logger.warning("faster-whisper is not installed. STT will be disabled.")
+            self.model = None
+            return
+
         logger.info(f"Loading Whisper model '{model_size}'...")
         try:
             self.model = WhisperModel(model_size, device=device, compute_type=compute_type)

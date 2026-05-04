@@ -7,7 +7,7 @@ import { useSocketStore } from '../../store/socketStore';
 
 export const ChatPanel = ({ sendMessage }) => {
   const [input, setInput] = useState('');
-  const { messages, currentAiStream } = useSocketStore();
+  const { messages, currentAiStream, pendingApproval, setPendingApproval } = useSocketStore();
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -79,20 +79,20 @@ export const ChatPanel = ({ sendMessage }) => {
       </div>
 
       {/* Approval Overlay */}
-      {useSocketStore.getState().pendingApproval && (
+      {pendingApproval && (
         <div className="p-4 bg-jarvis-alert/10 border-t border-jarvis-alert/50">
           <h3 className="text-jarvis-alert font-bold text-sm mb-2 uppercase tracking-wide">Security Override Required</h3>
           <p className="text-xs text-gray-300 mb-2">
-            Tool: <span className="font-mono text-jarvis-highlight">{useSocketStore.getState().pendingApproval.tool}</span>
+            Tool: <span className="font-mono text-jarvis-highlight">{pendingApproval.tool}</span>
           </p>
           <div className="bg-black/50 p-2 rounded text-xs font-mono text-gray-400 mb-3 overflow-x-auto">
-            {JSON.stringify(useSocketStore.getState().pendingApproval.params, null, 2)}
+            {JSON.stringify(pendingApproval.params, null, 2)}
           </div>
           <div className="flex gap-2">
             <button 
               onClick={() => {
-                sendMessage('tool_approval_response', { execution_id: useSocketStore.getState().pendingApproval.execution_id, approved: true });
-                useSocketStore.getState().setPendingApproval(null);
+                sendMessage('tool_approval_response', { execution_id: pendingApproval.execution_id, approved: true });
+                setPendingApproval(null);
               }}
               className="flex-1 bg-jarvis-success/20 hover:bg-jarvis-success/40 text-jarvis-success border border-jarvis-success/50 py-1 rounded text-xs font-bold transition-colors"
             >
@@ -100,8 +100,8 @@ export const ChatPanel = ({ sendMessage }) => {
             </button>
             <button 
               onClick={() => {
-                sendMessage('tool_approval_response', { execution_id: useSocketStore.getState().pendingApproval.execution_id, approved: false });
-                useSocketStore.getState().setPendingApproval(null);
+                sendMessage('tool_approval_response', { execution_id: pendingApproval.execution_id, approved: false });
+                setPendingApproval(null);
               }}
               className="flex-1 bg-jarvis-alert/20 hover:bg-jarvis-alert/40 text-jarvis-alert border border-jarvis-alert/50 py-1 rounded text-xs font-bold transition-colors"
             >

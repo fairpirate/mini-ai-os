@@ -20,7 +20,7 @@ function App() {
   const { sendMessage } = useWebSocket();
   const { isConnected, isAiThinking, systemStatus } = useSocketStore();
   
-  const { isRecording, volume, startRecording, stopRecording } = useVoice(sendMessage);
+  const { isRecording, volume, startRecording, stopRecording } = useVoice(sendMessage, isAiThinking);
   const { enqueueAudio, stopAudio } = useAudioPlayer();
 
   useEffect(() => {

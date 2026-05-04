@@ -20,8 +20,14 @@ async def planner_agent(state: AgentState) -> Dict[str, Any]:
     response = await ai_service.send_prompt(prompt, mode="planner")
     
     try:
-        # Assuming the model returns JSON
-        tasks = json.loads(response)
+        # Robust JSON extraction (handles markdown blocks)
+        content = response.strip()
+        if "```json" in content:
+            content = content.split("```json")[1].split("```")[0].strip()
+        elif "```" in content:
+            content = content.split("```")[1].strip()
+            
+        tasks = json.loads(content)
         if isinstance(tasks, list):
             return {"task_queue": tasks, "next_agent": "executor"}
     except json.JSONDecodeError:

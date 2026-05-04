@@ -17,3 +17,6 @@ python-multipart
 websockets
 loguru
 aiofiles
+faster-whisper
+sentence-transformers
+pytesseract

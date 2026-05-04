@@ -201,11 +201,18 @@ async def websocket_endpoint(websocket: WebSocket):
             # Handle Binary Audio Stream (from frontend mic)
             elif "bytes" in message:
                 audio_data = message["bytes"]
+                logger.info(f"Received binary audio data ({len(audio_data)} bytes) from {client_id}")
+                
+                await manager.send_personal_message({
+                    "event": "system_status",
+                    "payload": {"status": "processing", "message": "Neural Engine: Transcribing Voice..."}
+                }, client_id)
+                
                 from ...engine.audio.stt import stt_engine
                 transcript = await stt_engine.transcribe(audio_data)
                 
                 if transcript:
-                    logger.info(f"Heard: {transcript}")
+                    logger.info(f"Transcription successful: '{transcript}'")
                     # Send transcript to frontend so user sees it
                     await manager.send_personal_message({
                         "event": "transcription",
@@ -213,6 +220,12 @@ async def websocket_endpoint(websocket: WebSocket):
                     }, client_id)
                     # Directly invoke the AI pipeline with the transcript
                     await run_ai_pipeline(transcript, session_history, client_id, websocket)
+                else:
+                    logger.warning(f"Transcription resulted in empty text for {client_id}")
+                    await manager.send_personal_message({
+                        "event": "system_status",
+                        "payload": {"status": "ready", "message": "Neural Engine: No speech detected."}
+                    }, client_id)
 
     except WebSocketDisconnect:
         manager.disconnect(client_id)
