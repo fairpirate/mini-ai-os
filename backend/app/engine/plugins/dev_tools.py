@@ -4,21 +4,21 @@ from typing import Dict, Any
 from ..tools.base import AsyncTool, RiskLevel
 from ...core.logging import logger
 
-class RunTerminalCommandSchema(BaseModel):
-    command: str = Field(..., description="The shell command to execute.")
+class RunCommandSchema(BaseModel):
+    cmd: str = Field(..., description="The shell command to execute.")
 
-class RunTerminalCommandTool(AsyncTool):
-    name = "run_terminal_command"
+class RunCommandTool(AsyncTool):
+    name = "run_command"
     description = "Executes a shell command. THIS IS HIGH RISK AND REQUIRES APPROVAL."
     risk_level = RiskLevel.HIGH
-    schema = RunTerminalCommandSchema
+    schema = RunCommandSchema
 
     async def execute(self, params: Dict[str, Any]) -> str:
-        command = params["command"]
+        cmd = params["cmd"]
         try:
-            logger.info(f"Executing shell command: {command}")
+            logger.info(f"Executing shell command: {cmd}")
             process = await asyncio.create_subprocess_shell(
-                command,
+                cmd,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE
             )
@@ -35,4 +35,4 @@ class RunTerminalCommandTool(AsyncTool):
             return f"Execution error: {e}"
 
 def register_tools(registry):
-    registry.register(RunTerminalCommandTool())
+    registry.register(RunCommandTool())

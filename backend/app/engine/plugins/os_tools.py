@@ -30,7 +30,7 @@ class OpenAppTool(AsyncTool):
             return f"Error opening {app_name}: {e}"
 
 class CreateFileSchema(BaseModel):
-    path: str = Field(..., description="Relative path in the sandbox to create the file.")
+    name: str = Field(..., description="Name of the file to create in the sandbox.")
     content: str = Field(..., description="Text content to write to the file.")
 
 class CreateFileTool(AsyncTool):
@@ -43,7 +43,7 @@ class CreateFileTool(AsyncTool):
         sandbox_dir = "sandbox"
         os.makedirs(sandbox_dir, exist_ok=True)
         
-        file_path = os.path.join(sandbox_dir, params["path"])
+        file_path = os.path.join(sandbox_dir, params["name"])
         # Prevent path traversal
         if not os.path.abspath(file_path).startswith(os.path.abspath(sandbox_dir)):
             return "Error: Cannot create files outside the sandbox directory."
@@ -51,10 +51,51 @@ class CreateFileTool(AsyncTool):
         try:
             with open(file_path, "w") as f:
                 f.write(params["content"])
-            return f"Created file {params['path']} successfully."
+            return f"Created file {params['name']} successfully."
         except Exception as e:
             return f"Error creating file: {e}"
+
+class ReadFileSchema(BaseModel):
+    name: str = Field(..., description="Name of the file to read from the sandbox.")
+
+class ReadFileTool(AsyncTool):
+    name = "read_file"
+    description = "Reads a file from the workspace sandbox."
+    risk_level = RiskLevel.LOW
+    schema = ReadFileSchema
+
+    async def execute(self, params: Dict[str, Any]) -> str:
+        sandbox_dir = "sandbox"
+        file_path = os.path.join(sandbox_dir, params["name"])
+        if not os.path.exists(file_path):
+            return f"Error: File '{params['name']}' does not exist."
+            
+        try:
+            with open(file_path, "r") as f:
+                content = f.read()
+            return f"Content of '{params['name']}':\n\n{content}"
+        except Exception as e:
+            return f"Error reading file: {e}"
+
+class ListDirectorySchema(BaseModel):
+    pass
+
+class ListDirectoryTool(AsyncTool):
+    name = "list_directory"
+    description = "Lists all files in the workspace sandbox."
+    risk_level = RiskLevel.LOW
+    schema = ListDirectorySchema
+
+    async def execute(self, params: Dict[str, Any]) -> str:
+        sandbox_dir = "sandbox"
+        os.makedirs(sandbox_dir, exist_ok=True)
+        files = os.listdir(sandbox_dir)
+        if not files:
+            return "The sandbox is currently empty."
+        return "Files in sandbox:\n" + "\n".join([f"- {f}" for f in files])
 
 def register_tools(registry):
     registry.register(OpenAppTool())
     registry.register(CreateFileTool())
+    registry.register(ReadFileTool())
+    registry.register(ListDirectoryTool())

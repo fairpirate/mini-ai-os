@@ -101,7 +101,7 @@ class RunCommandTool(Tool):
     # Expanded allowlist
     ALLOWLIST = [
         "ls", "dir", "echo", "pwd", "git status", "git log", 
-        "npm --version", "python --version", "pip list", "node -v",
+        "npm --version", "python --version", "python", "pip list", "node -v",
         "date", "whoami", "uname -a"
     ]
 

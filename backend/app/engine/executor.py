@@ -66,8 +66,9 @@ async def execute_task(task_id: str):
             if step.id in completed_steps or step.id in failed_steps or step.id in running_steps:
                 continue
 
-            # Check dependencies
-            deps_met = all(dep in completed_steps for dep in step.dependencies)
+            # Check dependencies, ignoring any that don't exist in the plan to handle LLM hallucinations
+            valid_deps = [dep for dep in step.dependencies if dep in steps_map]
+            deps_met = all(dep in completed_steps for dep in valid_deps)
             
             if deps_met:
                 running_steps.add(step.id)
