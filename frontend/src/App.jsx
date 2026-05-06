@@ -63,8 +63,9 @@ function App() {
           <VoiceOrb isListening={isRecording} isThinking={isAiThinking} volume={volume} />
           
           <div className="mt-8 text-center pointer-events-auto">
-            <h1 className="text-3xl font-light tracking-[0.2em] neon-text uppercase">Megan OS</h1>
-            <p className="text-xs text-gray-400 tracking-widest mt-2 uppercase">Neural Engine V1.0</p>
+            <h1 className="text-3xl font-light tracking-[0.2em] neon-text uppercase">MEGAN OS</h1>
+            <p className="text-xs text-gray-400 tracking-widest mt-1 uppercase">Self-Upgrading Autonomous AI</p>
+            <p className="text-xs text-gray-600 tracking-widest mt-0.5 uppercase">Build · Execute · Evolve · Complete</p>
             <p className={`text-xs mt-4 uppercase tracking-widest ${isConnected ? 'text-jarvis-success' : 'text-jarvis-alert'}`}>
               {systemStatus}
             </p>

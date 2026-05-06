@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException
+import asyncio
 import uuid
 import time
 import os
@@ -7,6 +8,7 @@ from ...models.schemas import Task, TaskStatus, Union, ChatResponse
 from ...planner.planner import generate_plan
 from ...engine.executor import add_task, get_all_tasks, get_task, execute_task
 from ...tools.implementations import registry
+from ...core.logging import logger
 
 router = APIRouter()
 
@@ -31,10 +33,11 @@ async def create_plan(request: dict):
         updated_at=time.time()
     )
     add_task(task)
+    logger.info(f"Task created: {task_id} with {len(ai_response.steps)} steps")
     return task
 
 @router.post("/approve/{task_id}")
-async def approve_task(task_id: str, background_tasks: BackgroundTasks):
+async def approve_task(task_id: str):
     task = get_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -45,8 +48,9 @@ async def approve_task(task_id: str, background_tasks: BackgroundTasks):
     task.status = TaskStatus.APPROVED
     task.updated_at = time.time()
     
-    # Run execution in background
-    background_tasks.add_task(execute_task, task_id)
+    # Schedule async execution on the running event loop
+    asyncio.create_task(execute_task(task_id))
+    logger.info(f"Task {task_id} approved and execution scheduled.")
     
     return {"message": "Task approved and execution started.", "task_id": task_id}
 
